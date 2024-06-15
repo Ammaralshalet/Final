@@ -4,9 +4,19 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 TextEditingController email = TextEditingController();
+TextEditingController password = TextEditingController();
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
+
+  @override
+  _LoginPageState createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  bool _rememberMe = false;
+  bool _obscureText = true;
+  String errorText = '';
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +41,7 @@ class LoginPage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(15),
                       ),
                       child: Padding(
-                        padding: EdgeInsets.all(16.0),
+                        padding: const EdgeInsets.all(16.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -45,6 +55,7 @@ class LoginPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 5),
                             TextField(
+                              controller: email,
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: const Color(0xff5AB8B8),
@@ -78,11 +89,23 @@ class LoginPage extends StatelessWidget {
                             ),
                             const SizedBox(height: 5),
                             TextField(
-                              obscureText: true,
+                              controller: password,
+                              obscureText: _obscureText,
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: const Color(0xff5AB8B8),
-                                suffixIcon: const Icon(Icons.visibility),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureText
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _obscureText = !_obscureText;
+                                    });
+                                  },
+                                ),
                                 hintText: 'password',
                                 hintStyle: const TextStyle(color: Colors.black),
                                 border: OutlineInputBorder(
@@ -103,45 +126,76 @@ class LoginPage extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 20,
                             ),
-                            Container(
-                              width: screenWidth - 10,
-                              decoration: BoxDecoration(
-                                  color: const Color(0xff5AB8B8),
-                                  borderRadius: BorderRadius.circular(25)),
-                              child: InkWell(onTap: () {
-                                core
-                                    .get<SharedPreferences>()
-                                    .setString('name', email.text);
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) =>
-                                            const DataPage()));
-                              }),
+                            Center(
+                              child: InkWell(
+                                onTap: () async {
+                                  if (email.text.isEmpty) {
+                                    setState(() {
+                                      errorText = 'Please enter your email';
+                                    });
+                                  } else {
+                                    SharedPreferences prefs =
+                                        await SharedPreferences.getInstance();
+                                    await prefs.setString('name', email.text);
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => const DataPage(),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: Container(
+                                  height: 30,
+                                  width: screenWidth * 0.5,
+                                  decoration: BoxDecoration(
+                                    color:
+                                        const Color.fromARGB(255, 63, 62, 62),
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'Login',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                             const SizedBox(
-                              height: 10,
+                              height: 20,
                             ),
                             Row(
                               children: [
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Container(
-                                    height: 15,
-                                    width: 15,
-                                    color: const Color(0xff535353),
-                                  ),
+                                Checkbox(
+                                  value: _rememberMe,
+                                  onChanged: (bool? value) {
+                                    setState(() {
+                                      _rememberMe = value!;
+                                    });
+                                  },
                                 ),
                                 const Text(
                                   'Remember me',
                                   style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.w400),
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
                               ],
                             ),
+                            if (errorText.isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: Text(
+                                  errorText,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              ),
                           ],
                         ),
                       ),

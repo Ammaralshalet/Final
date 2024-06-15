@@ -1,5 +1,6 @@
 import 'package:flutquiz/model/model_app.dart';
 import 'package:flutquiz/service/data_service.dart';
+import 'package:flutquiz/view/uesr_page.dart';
 import 'package:flutter/material.dart';
 
 class DataPage extends StatefulWidget {
@@ -18,6 +19,24 @@ class _DataPageState extends State<DataPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
+      appBar: AppBar(
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 20),
+            child: InkWell(
+              child: const Icon(Icons.person),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const UserPage(),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
       body: Column(
         children: [
           const SizedBox(
